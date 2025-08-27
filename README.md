@@ -21,8 +21,6 @@ Project/
 │── mlx90614.h       // 温度传感器驱动
 │── key.c
 │── key.h            // 按键扫描
-│── led.c
-│── led.h            // LED 报警逻辑
 │── buzzer.c
 │── buzzer.h         // 蜂鸣器报警逻辑
 ```
