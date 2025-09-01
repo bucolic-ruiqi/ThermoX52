@@ -1,39 +1,26 @@
 /*
- * 文件名：key.c
- * 功能：按键扫描实现
- * 描述：实现按键的扫描和消抖功能
- * 作者：[作者名]
- * 日期：2025/08/27
+ * 按键扫描实现
  */
 
-#include "key.h"        // 按键头文件
-#include "delay.h"      // 延时函数头文件
+#include "key.h"
+#include "delay.h"
 
-/*
- * 函数名：Key_Scan
- * 功能：扫描按键状态并进行消抖处理
- * 参数：无
- * 返回值：按键值（1-4表示对应按键按下，0表示无按键按下）
- * 说明：采用软件消抖，当检测到按键按下后延时10ms再次检测确认
- */
+// 按键扫描（带消抖）
 unsigned char Key_Scan(void) {
-    // 检测按键1（测温功能）
     if(!KEY1) { 
-        delay_ms(10);       // 延时消抖
-        if(!KEY1) return 1; // 确认按键1按下
+        delay_ms(10);
+        if(!KEY1) return 1;
     }
     
-    // 检测按键2（调高阈值温度）
     if(!KEY2) { 
-        delay_ms(10);       // 延时消抖
-        if(!KEY2) return 2; // 确认按键2按下
+        delay_ms(10);
+        if(!KEY2) return 2;
     }
     
-    // 检测按键3（调低阈值温度）
     if(!KEY3) { 
-        delay_ms(10);       // 延时消抖
-        if(!KEY3) return 3; // 确认按键3按下
+        delay_ms(10);
+        if(!KEY3) return 3;
     }
     
-    return 0;               // 无按键按下
+    return 0;
 }

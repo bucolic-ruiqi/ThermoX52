@@ -1,57 +1,121 @@
 /*
- * 文件名：main.c
- * 功能：基于STC89C52单片机的MLX90614红外温度计主程序
- * 描述：使用MLX90614红外温度传感器测量温度，通过LCD1602显示，
- *       支持按键调节阈值温度，温度超标时LED和蜂鸣器报警
- * 作者：[作者名]
- * 日期：2025/08/27
+ * MLX90614红外温度计主程序
+ * 功能：温度测量、LCD显示、按键调节阈值、超温报警
  */
 
-#include "reg52.h"      // 52单片机寄存器定义
-#include "delay.h"      // 延时函数头文件
-#include "lcd1602.h"    // LCD1602显示屏驱动头文件
-#include "mlx90614.h"   // MLX90614温度传感器驱动头文件
-#include "key.h"        // 按键扫描头文件
-#include "buzzer.h"     // 蜂鸣器报警头文件
-#include <stdio.h>      // 标准输入输出头文件
+#include "reg52.h"
+#include "delay.h"
+#include "lcd1602.h"
+#include "mlx90614.h"
+#include "key.h"
+#include "buzzer.h"
+#include <stdio.h>
 
-/*
- * 函数名：main
- * 功能：主程序入口，控制整个系统的运行逻辑
- * 参数：无
- * 返回值：无
- */
 void main() {
-    float temp;                     // 温度值变量
-    unsigned char key;              // 按键值变量
-    unsigned int threshold=38;      // 阈值温度（默认38℃）
+    float temp;
+    unsigned char key;
+    unsigned int threshold=38;      // 默认阈值38℃
+    char buf[16];
+    unsigned char connection_ok;
 
     // 系统初始化
-    LCD_Init();                     // 初始化LCD1602显示屏
-    BEEP=1;                         // 蜂鸣器初始化为关闭状态
+    LCD_Init();
+    MLX90614_Init();
+    BEEP=1;
 
-    // 显示系统标题
-    LCD_PrintString(0,0,"MLX90614 Demo");
+    // 开机动画
+    LCD_WriteCmd(0x01);
+    LCD_PrintString(0,3,"T");
+    delay_ms(150);
+    LCD_PrintString(0,3,"Th");
+    delay_ms(150);
+    LCD_PrintString(0,3,"The");
+    delay_ms(150);
+    LCD_PrintString(0,3,"Ther");
+    delay_ms(150);
+    LCD_PrintString(0,3,"Therm");
+    delay_ms(150);
+    LCD_PrintString(0,3,"Thermo");
+    delay_ms(150);
+    LCD_PrintString(0,3,"ThermoX");
+    delay_ms(150);
+    LCD_PrintString(0,3,"ThermoX5");
+    delay_ms(150);
+    LCD_PrintString(0,3,"ThermoX52");
+    delay_ms(800);
+    
+    // 显示版本信息
+    LCD_PrintString(1,6,"v1.0");
+    delay_ms(1000);
+    
+    // 清屏显示最终标题
+    LCD_WriteCmd(0x01);
+    delay_ms(5);                // 等待清屏完成
+    LCD_PrintString(0,0,"ThermoX52");
+    
+    // 检查传感器连接
+    connection_ok = MLX90614_CheckConnection();
+    if(connection_ok) {
+        LCD_PrintString(1,0,"Sensor OK");
+    } else {
+        LCD_PrintString(1,0,"Sensor Error!");
+    }
+    delay_ms(2000);
 
     // 主循环
     while(1) {
-        key=Key_Scan();             // 扫描按键状态
+        key=Key_Scan();
         
-        if(key==1) {                // 按键1：测温功能
-            temp=MLX90614_ReadTemp(); // 读取MLX90614传感器温度值
-            char buf[16];             // 字符串缓冲区
-            sprintf(buf,"T:%.1fC",temp); // 格式化温度字符串
-            LCD_PrintString(1,0,buf); // 在LCD第二行显示温度
+        if(key==1) {                // 测温
+            temp=MLX90614_ReadTemp();
             
-            // 高温报警（超过阈值温度时蜂鸣器报警）
-            if(temp>threshold)
-                Buzzer_Warning(3);    // 蜂鸣器响3次报警
+            LCD_WriteCmd(0x01);     // 清屏
+            delay_ms(5);            // 等待清屏完成
+            LCD_PrintString(0,0,"ThermoX52");
+            
+            if(temp == -999.0) {
+                LCD_PrintString(1,0,"Read Error!");
+            } else {
+                sprintf(buf,"T:%.1fC",temp);
+                LCD_PrintString(1,0,buf);
+                
+                // 超温报警
+                if(temp>threshold) {
+                    Buzzer_Warning(3);
+                    // 显示警告信息
+                    LCD_WriteCmd(0x01);     // 清屏
+                    delay_ms(5);
+                    LCD_PrintString(0,0,"ThermoX52");
+                    LCD_PrintString(1,0,"Warning!");
+                    delay_ms(2000);         // 显示2秒警告
+                    // 恢复温度显示
+                    LCD_WriteCmd(0x01);
+                    delay_ms(5);
+                    LCD_PrintString(0,0,"ThermoX52");
+                    sprintf(buf,"T:%.1fC",temp);
+                    LCD_PrintString(1,0,buf);
+                }
+            }
         }
-        else if(key==2) {           // 按键2：调高阈值温度
-            threshold++;            // 阈值温度加1
+        else if(key==2) {           // 调高阈值
+            threshold++;
+            LCD_WriteCmd(0x01);     // 清屏
+            delay_ms(5);            // 等待清屏完成
+            LCD_PrintString(0,0,"ThermoX52");
+            sprintf(buf,"Th:%dC",threshold);
+            LCD_PrintString(1,0,buf);
+            delay_ms(1000);
         }
-        else if(key==3) {           // 按键3：调低阈值温度
-            threshold--;            // 阈值温度减1
+        else if(key==3) {           // 调低阈值
+            threshold--;
+            LCD_WriteCmd(0x01);     // 清屏
+            delay_ms(5);            // 等待清屏完成
+            LCD_PrintString(0,0,"ThermoX52");
+            sprintf(buf,"Th:%dC",threshold);
+            LCD_PrintString(1,0,buf);
+            delay_ms(1000);
         }
+        
+        delay_ms(100);
     }
 }

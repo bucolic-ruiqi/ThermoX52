@@ -1,22 +1,15 @@
 /*
- * 文件名：mlx90614.h
- * 功能：MLX90614红外温度传感器驱动头文件
- * 描述：提供MLX90614传感器的温度读取函数声明
- * 作者：[作者名]
- * 日期：2025/08/27
+ * MLX90614红外温度传感器驱动
  */
 
 #ifndef __MLX90614_H__
 #define __MLX90614_H__
 
-#include "reg52.h"      // 52单片机寄存器定义
+#include "reg52.h"
 
-/*
- * 函数名：MLX90614_ReadTemp
- * 功能：读取MLX90614传感器测量的温度值
- * 参数：无
- * 返回值：温度值（摄氏度，浮点数）
- */
+// 函数声明
+void MLX90614_Init(void);
+unsigned char MLX90614_CheckConnection(void);
 float MLX90614_ReadTemp(void);
 
 #endif
