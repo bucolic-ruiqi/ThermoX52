@@ -11,5 +11,6 @@
 sbit BEEP = P2^3;
 
 void Buzzer_Warning(unsigned int n);
+void Buzzer_KeyBeep(void);
 
 #endif

@@ -11,5 +11,7 @@
 void MLX90614_Init(void);
 unsigned char MLX90614_CheckConnection(void);
 float MLX90614_ReadTemp(void);
+float MLX90614_ReadAmbientTemp(void);
+float MLX90614_ReadCompensatedTemp(void);
 
 #endif
