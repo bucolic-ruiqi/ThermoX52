@@ -13,5 +13,5 @@
 
 <div align="center">
 
-**⭐ If this project helps you, please give it a Star! ⭐**
+**⭐ If this project helps you, please give it a Star! / 如果這個專案對您有幫助，請給它一個Star！⭐**
 </div>
